@@ -1,0 +1,283 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		FB2506BA1DEBA90C00973199 /* FConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = FB2506B81DEBA90C00973199 /* FConvenience.m */; };
+		FB2506BF1DEBA9E700973199 /* winBuddy.m in Sources */ = {isa = PBXBuildFile; fileRef = FB2506BE1DEBA9E700973199 /* winBuddy.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		FB2506AC1DEBA8EA00973199 /* winBuddy.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = winBuddy.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB2506AF1DEBA8EA00973199 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FB2506B71DEBA90C00973199 /* FConvenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FConvenience.h; sourceTree = "<group>"; };
+		FB2506B81DEBA90C00973199 /* FConvenience.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FConvenience.m; sourceTree = "<group>"; };
+		FB2506BE1DEBA9E700973199 /* winBuddy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = winBuddy.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FB2506A91DEBA8EA00973199 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		FB2506A31DEBA8EA00973199 = {
+			isa = PBXGroup;
+			children = (
+				FB2506AE1DEBA8EA00973199 /* winBuddy */,
+				FB2506AD1DEBA8EA00973199 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		FB2506AD1DEBA8EA00973199 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FB2506AC1DEBA8EA00973199 /* winBuddy.bundle */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FB2506AE1DEBA8EA00973199 /* winBuddy */ = {
+			isa = PBXGroup;
+			children = (
+				FB2506C11DEBA9F600973199 /* FConvenience */,
+				FB2506BE1DEBA9E700973199 /* winBuddy.m */,
+				FB2506AF1DEBA8EA00973199 /* Info.plist */,
+			);
+			path = winBuddy;
+			sourceTree = "<group>";
+		};
+		FB2506C11DEBA9F600973199 /* FConvenience */ = {
+			isa = PBXGroup;
+			children = (
+				FB2506B71DEBA90C00973199 /* FConvenience.h */,
+				FB2506B81DEBA90C00973199 /* FConvenience.m */,
+			);
+			name = FConvenience;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		FB2506AB1DEBA8EA00973199 /* winBuddy */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FB2506B21DEBA8EA00973199 /* Build configuration list for PBXNativeTarget "winBuddy" */;
+			buildPhases = (
+				FB2506A81DEBA8EA00973199 /* Sources */,
+				FB2506A91DEBA8EA00973199 /* Frameworks */,
+				FB2506AA1DEBA8EA00973199 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = winBuddy;
+			productName = winBuddy;
+			productReference = FB2506AC1DEBA8EA00973199 /* winBuddy.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FB2506A41DEBA8EA00973199 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0810;
+				ORGANIZATIONNAME = "Wolfgang Baird";
+				TargetAttributes = {
+					FB2506AB1DEBA8EA00973199 = {
+						CreatedOnToolsVersion = 8.1;
+						DevelopmentTeam = EX596BNL45;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = FB2506A71DEBA8EA00973199 /* Build configuration list for PBXProject "winBuddy" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = FB2506A31DEBA8EA00973199;
+			productRefGroup = FB2506AD1DEBA8EA00973199 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FB2506AB1DEBA8EA00973199 /* winBuddy */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FB2506AA1DEBA8EA00973199 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		FB2506A81DEBA8EA00973199 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FB2506BA1DEBA90C00973199 /* FConvenience.m in Sources */,
+				FB2506BF1DEBA9E700973199 /* winBuddy.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		FB2506B01DEBA8EA00973199 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		FB2506B11DEBA8EA00973199 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVES = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "-";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		FB2506B31DEBA8EA00973199 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = EX596BNL45;
+				INFOPLIST_FILE = winBuddy/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				PRODUCT_BUNDLE_IDENTIFIER = org.w0lf.winBuddy;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Debug;
+		};
+		FB2506B41DEBA8EA00973199 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = EX596BNL45;
+				INFOPLIST_FILE = winBuddy/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				PRODUCT_BUNDLE_IDENTIFIER = org.w0lf.winBuddy;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		FB2506A71DEBA8EA00973199 /* Build configuration list for PBXProject "winBuddy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FB2506B01DEBA8EA00973199 /* Debug */,
+				FB2506B11DEBA8EA00973199 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FB2506B21DEBA8EA00973199 /* Build configuration list for PBXNativeTarget "winBuddy" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FB2506B31DEBA8EA00973199 /* Debug */,
+				FB2506B41DEBA8EA00973199 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FB2506A41DEBA8EA00973199 /* Project object */;
+}
