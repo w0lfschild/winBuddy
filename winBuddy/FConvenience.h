@@ -47,14 +47,6 @@
 
 #define CLAMP(val, min, max) MAX((min), MIN((val), (max)))
 
-// iOS specific
-#if TARGET_OS_IPHONE
-    #define WithDur UIView animateWithDuration // Use like: [AnimateWithDur:0.3
-                                               //                animations:^{...}]
-    #define Device [UIDevice currentDevice]
-    #define UIApp  [UIApplication sharedApplication]
-#endif
-
 @interface NSUserDefaults (Subscripts)
 - (id)objectForKeyedSubscript:(id)aKey;
 - (void)setObject:(id)aObj forKeyedSubscript:(id)aKey;

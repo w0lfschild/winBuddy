@@ -12,9 +12,8 @@
 #import <Carbon/Carbon.h>
 #import <objc/runtime.h>
 
-#define KILLLIST @[@"com.apple.iTunes", @"com.torusknot.SourceTree", @"freemind.main.FreeMind"] 
-#define BLACKLIST @[@"com.apple.systempreferences", @"com.adobe.Photoshop", @"com.rdio.desktop", @"net.elasticthreads.nv"]
-#define GRAYLIST @[@"com.apple.Safari", @"com.google.chrome"]
+#define APP_BLACKLIST @[@"com.apple.loginwindow", @"com.apple.notificationcenter"]
+#define CLS_BLACKLIST @[@"TDesktopWindow", @"NSStatusBarWindow"]
 
 #define PrefKey(key)  (@"winBuddy_" key)
 #define ReadPref(key) [Defaults objectForKey:PrefKey(key)]
@@ -26,6 +25,7 @@ static const char * const borderKey = "mf_border";
 - (void)_updateMenubarState;
 - (IBAction)_toggleMenubar:(id)sender;
 - (IBAction)_toggleShadows:(id)sender;
+- (IBAction)_toggleBorder:(id)sender;
 @end
 
 @interface NSWindow (wb_window)
@@ -53,23 +53,41 @@ static void *isActive = &isActive;
 + (void)load
 {
     plugin = [winBuddy sharedInstance];
+    NSUInteger osx_ver = [[NSProcessInfo processInfo] operatingSystemVersion].minorVersion;
     
-    [Defaults registerDefaults:@{ PrefKey(@"ShouldHideMenubar"): @YES }];
-    [Defaults registerDefaults:@{ PrefKey(@"ShowShadow"): @YES }];
-    [Defaults registerDefaults:@{ PrefKey(@"ShowBorder"): @YES }];
-    [Defaults registerDefaults:@{ PrefKey(@"FloatWindow"): @YES }];
+    if (osx_ver >= 9)
+    {
+        if (![APP_BLACKLIST containsObject:[[NSBundle mainBundle] bundleIdentifier]])
+        {
+            NSLog(@"Loading winBuddy...");
+            
+            [Defaults registerDefaults:@{ PrefKey(@"HideMenubar"): @NO }];
+            [Defaults registerDefaults:@{ PrefKey(@"HideShadow"): @YES }];
+            [Defaults registerDefaults:@{ PrefKey(@"ShowBorder"): @YES }];
 
-    [plugin setMenu];
-    [plugin _updateMenubarState];
-    
-    // Initialize any windows that might already exist
-    for(NSWindow *window in [NSApp windows])
-        [plugin winBuddy_initialize:window];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:plugin
-                                             selector:@selector(winBuddy_WindowDidBecomeKey:)
-                                                 name:NSWindowDidBecomeKeyNotification
-                                               object:nil];
+            [plugin setMenu];
+            [plugin _updateMenubarState];
+            
+            // Initialize any windows that might already exist
+            for(NSWindow *window in [NSApp windows])
+                [plugin winBuddy_initialize:window];
+            
+            [[NSNotificationCenter defaultCenter] addObserver:plugin
+                                                     selector:@selector(winBuddy_WindowDidBecomeKey:)
+                                                         name:NSWindowDidBecomeKeyNotification
+                                                       object:nil];
+            
+            NSLog(@"%@ loaded into %@ on macOS 10.%ld", [self class], [[NSBundle mainBundle] bundleIdentifier], (long)osx_ver);
+        }
+        else
+        {
+            NSLog(@"winBuddy is blocked in this application because of issues");
+        }
+    }
+    else
+    {
+        NSLog(@"winBuddy is blocked in this application because of your version of macOS is too old");
+    }
 }
 
 - (void)winBuddy_WindowDidBecomeKey:(NSNotification *)notification {
@@ -77,17 +95,21 @@ static void *isActive = &isActive;
 }
 
 - (void)winBuddy_initialize:(NSWindow*)theWindow {
-    if (![objc_getAssociatedObject(theWindow, isActive) boolValue])
+    if (![CLS_BLACKLIST containsObject:[theWindow className]])
     {
-        theWindow.hasShadow = [ReadPref(@"ShowShadow") boolValue];
-        [plugin _updateMenubarState];
-        [theWindow mf_setupBorder];
-        objc_setAssociatedObject(theWindow, isActive, [NSNumber numberWithBool:true], OBJC_ASSOCIATION_RETAIN);
+        if (![objc_getAssociatedObject(theWindow, isActive) boolValue])
+        {
+            if (ReadPref(@"HideShadow") != nil)
+                theWindow.hasShadow = [ReadPref(@"HideShadow") boolValue];
+            [plugin _updateMenubarState];
+            [theWindow mf_setupBorder];
+            objc_setAssociatedObject(theWindow, isActive, [NSNumber numberWithBool:true], OBJC_ASSOCIATION_RETAIN);
+        }
     }
 }
 
 - (void)_updateMenubarState {
-    if(![ReadPref(@"ShouldHideMenubar") boolValue])
+    if([ReadPref(@"HideMenubar") boolValue])
         SetSystemUIMode(kUIModeAllSuppressed, kUIOptionAutoShowMenuBar);
     else
         SetSystemUIMode(kUIModeNormal, 0);
@@ -95,7 +117,7 @@ static void *isActive = &isActive;
 
 - (void)_updateShadowState {
     for(NSWindow *window in [NSApp windows])
-        [window setHasShadow:[ReadPref(@"ShowShadow") boolValue]];
+        [window setHasShadow:[ReadPref(@"HideShadow") boolValue]];
 }
 
 - (void)_updateBorderState {
@@ -105,14 +127,14 @@ static void *isActive = &isActive;
 
 
 - (IBAction)_toggleMenubar:(id)sender {
-    WritePref(@"ShouldHideMenubar", @(![ReadPref(@"ShouldHideMenubar") boolValue]));
-    [sender setState:[ReadPref(@"ShouldHideMenubar") boolValue]];
+    WritePref(@"HideMenubar", @(![ReadPref(@"HideMenubar") boolValue]));
+    [sender setState:[ReadPref(@"HideMenubar") boolValue]];
     [self _updateMenubarState];
 }
 
 - (IBAction)_toggleShadows:(id)sender {
-    WritePref(@"ShowShadow", @(![ReadPref(@"ShowShadow") boolValue]));
-    [sender setState:[ReadPref(@"ShowShadow") boolValue]];
+    WritePref(@"HideShadow", @(![ReadPref(@"HideShadow") boolValue]));
+    [sender setState:[ReadPref(@"HideShadow") boolValue]];
     [self _updateShadowState];
 }
 
@@ -135,15 +157,12 @@ static void *isActive = &isActive;
 - (NSMenu*)winBuddyMenuCreate {
     NSMenu *submenuRoot = [[NSMenu alloc] init];
     [submenuRoot setTitle:@""];
-    [[submenuRoot addItemWithTitle:@"Show menubar and dock" action:@selector(_toggleMenubar:) keyEquivalent:@"\n"] setTarget:plugin];
-    [[submenuRoot addItemWithTitle:@"Show window shadows" action:@selector(_toggleShadows:) keyEquivalent:@""] setTarget:plugin];
+    [[submenuRoot addItemWithTitle:@"Hide menubar and dock" action:@selector(_toggleMenubar:) keyEquivalent:@""] setTarget:plugin];
+    [[submenuRoot addItemWithTitle:@"Hide window shadows" action:@selector(_toggleShadows:) keyEquivalent:@""] setTarget:plugin];
     [[submenuRoot addItemWithTitle:@"Show window borders" action:@selector(_toggleBorder:) keyEquivalent:@""] setTarget:plugin];
-//    [[submenuRoot addItemWithTitle:@"Float window" action:@selector(toggleBadges:) keyEquivalent:@""] setTarget:plugin];
-//    [[submenuRoot addItemWithTitle:@"Check for updates" action:@selector(checkUpdate:) keyEquivalent:@""] setTarget:plugin];
-    [[submenuRoot itemAtIndex:0] setState:[ReadPref(@"ShouldHideMenubar") boolValue]];
-    [[submenuRoot itemAtIndex:1] setState:[ReadPref(@"ShowShadow") boolValue]];
+    [[submenuRoot itemAtIndex:0] setState:[ReadPref(@"HideMenubar") boolValue]];
+    [[submenuRoot itemAtIndex:1] setState:[ReadPref(@"HideShadow") boolValue]];
     [[submenuRoot itemAtIndex:2] setState:[ReadPref(@"ShowBorder") boolValue]];
-//    [[submenuRoot itemAtIndex:3] setState:[ReadPref(@"FloatWindow") boolValue]];
     return submenuRoot;
 }
 
@@ -169,7 +188,7 @@ static void *isActive = &isActive;
     [NotificationCenter removeObserver:self
                                   name:NSWindowDidUpdateNotification
                                 object:self];
-    
+        
     // Create a child window to keep the border
     NSWindow *child = [[NSWindow alloc] initWithContentRect:self.frame
                                                   styleMask:NSBorderlessWindowMask
@@ -184,16 +203,20 @@ static void *isActive = &isActive;
     border.borderColor = [NSColor blackColor];
     border.borderWidth = 1;
     child.contentView = border;
-    
     child.ignoresMouseEvents = YES;
     child.movableByWindowBackground = NO;
     child.opaque = NO;
     child.backgroundColor = [NSColor clearColor];
     [child setHidesOnDeactivate:NO];
     [child useOptimizedDrawing:YES];
+    [child setReleasedWhenClosed:false];
     [self addChildWindow:child ordered:NSWindowAbove];
     
     objc_setAssociatedObject(self, borderKey, child, OBJC_ASSOCIATION_RETAIN);
+    
+    [NotificationCenter addObserver:self selector:@selector(mf_releaseChild)
+                               name:NSWindowWillCloseNotification
+                             object:self];
     
     [NotificationCenter addObserver:self selector:@selector(mf_updateBorder)
                                name:NSWindowDidBecomeKeyNotification
@@ -201,9 +224,37 @@ static void *isActive = &isActive;
     [NotificationCenter addObserver:self selector:@selector(mf_updateBorder)
                                name:NSWindowDidResignKeyNotification
                              object:self];
+    
+    [self mf_updateBorder];
+}
+
+- (void)mf_releaseChild {
+    [NotificationCenter removeObserver:self
+                                  name:NSWindowWillCloseNotification
+                                object:self];
+    [NotificationCenter removeObserver:self
+                                  name:NSWindowDidResizeNotification
+                                object:self];
+    [NotificationCenter removeObserver:self
+                                  name:NSWindowDidEndSheetNotification
+                                object:self];
+    [NotificationCenter removeObserver:self
+                                  name:NSWindowDidBecomeKeyNotification
+                                object:self];
+    [NotificationCenter removeObserver:self
+                                  name:NSWindowDidResignKeyNotification
+                                object:self];
+
+    [NotificationCenter addObserver:self selector:@selector(mf_setupBorder)
+                               name:NSWindowDidBecomeKeyNotification
+                             object:self];
+    
+    NSWindow *borderWin = objc_getAssociatedObject(self, borderKey);
+    [borderWin close];
 }
 
 - (void)mf_updateBorder {
+//    NSLog(@"wb_Logging: %@", [self className]);
     NSWindow *borderWin = objc_getAssociatedObject(self, borderKey);
     [borderWin.contentView setBorderColor:self.isKeyWindow ? [NSColor redColor] : [NSColor blackColor]];
     [borderWin setFrame:self.frame display:YES];
