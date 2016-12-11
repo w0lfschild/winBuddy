@@ -12,7 +12,7 @@
 #import <Carbon/Carbon.h>
 #import <objc/runtime.h>
 
-#define APP_BLACKLIST @[@"com.apple.loginwindow", @"com.apple.notificationcenter"]
+#define APP_BLACKLIST @[@"com.apple.loginwindow", @"com.apple.notificationcenterui"]
 #define CLS_BLACKLIST @[@"TDesktopWindow", @"NSStatusBarWindow"]
 
 #define PrefKey(key)  (@"winBuddy_" key)
@@ -100,7 +100,7 @@ static void *isActive = &isActive;
         if (![objc_getAssociatedObject(theWindow, isActive) boolValue])
         {
             if (ReadPref(@"HideShadow") != nil)
-                theWindow.hasShadow = [ReadPref(@"HideShadow") boolValue];
+                theWindow.hasShadow = ![ReadPref(@"HideShadow") boolValue];
             [plugin _updateMenubarState];
             [theWindow mf_setupBorder];
             objc_setAssociatedObject(theWindow, isActive, [NSNumber numberWithBool:true], OBJC_ASSOCIATION_RETAIN);
@@ -117,7 +117,7 @@ static void *isActive = &isActive;
 
 - (void)_updateShadowState {
     for(NSWindow *window in [NSApp windows])
-        [window setHasShadow:[ReadPref(@"HideShadow") boolValue]];
+        [window setHasShadow:![ReadPref(@"HideShadow") boolValue]];
 }
 
 - (void)_updateBorderState {

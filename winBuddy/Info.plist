@@ -15,9 +15,9 @@
 	<key>CFBundlePackageType</key>
 	<string>BNDL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.2.3</string>
+	<string>0.2.5</string>
 	<key>CFBundleVersion</key>
-	<string>5</string>
+	<string>8</string>
 	<key>NSHumanReadableCopyright</key>
 	<string>Copyright © 2016 Wolfgang Baird. All rights reserved.</string>
 	<key>NSPrincipalClass</key>
