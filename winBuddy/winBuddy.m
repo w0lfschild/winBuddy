@@ -13,7 +13,7 @@
 #import <objc/runtime.h>
 
 #define APP_BLACKLIST @[@"com.apple.loginwindow", @"com.apple.notificationcenterui"]
-#define CLS_BLACKLIST @[@"TDesktopWindow", @"NSStatusBarWindow"]
+#define CLS_BLACKLIST @[@"TDesktopWindow", @"NSStatusBarWindow", @"NSCarbonMenuWindow", @"BookmarkBarFolderWindow", @"TShrinkToFitWindow", @"QLFullscreenWindow", @"QLPreviewPanel"]
 
 #define PrefKey(key)  (@"winBuddy_" key)
 #define ReadPref(key) [Defaults objectForKey:PrefKey(key)]
@@ -95,6 +95,7 @@ static void *isActive = &isActive;
 }
 
 - (void)winBuddy_initialize:(NSWindow*)theWindow {
+//    NSLog(@"wb_ %@", [theWindow className]);
     if (![CLS_BLACKLIST containsObject:[theWindow className]])
     {
         if (![objc_getAssociatedObject(theWindow, isActive) boolValue])
@@ -254,7 +255,6 @@ static void *isActive = &isActive;
 }
 
 - (void)mf_updateBorder {
-//    NSLog(@"wb_Logging: %@", [self className]);
     NSWindow *borderWin = objc_getAssociatedObject(self, borderKey);
     [borderWin.contentView setBorderColor:self.isKeyWindow ? [NSColor redColor] : [NSColor blackColor]];
     [borderWin setFrame:self.frame display:YES];
