@@ -13,13 +13,13 @@
 #import <objc/runtime.h>
 
 #define APP_BLACKLIST @[@"com.apple.loginwindow", @"com.apple.notificationcenterui"]
-#define CLS_BLACKLIST @[@"TDesktopWindow", @"NSStatusBarWindow", @"NSCarbonMenuWindow", @"BookmarkBarFolderWindow", @"TShrinkToFitWindow", @"QLFullscreenWindow", @"QLPreviewPanel"]
+#define CLS_BLACKLIST @[@"TDesktopWindow", @"NSStatusBarWindow", @"NSCarbonMenuWindow", @"BookmarkBarFolderWindow", @"TShrinkToFitWindow", @"QLFullscreenWindow", @"QLPreviewPanel", @"NCRemoteViewServiceWindow"]
 
 #define PrefKey(key)  (@"winBuddy_" key)
 #define ReadPref(key) [Defaults objectForKey:PrefKey(key)]
 #define WritePref(key, value) [Defaults setObject:(value) forKey:PrefKey(key)]
 
-static const char * const borderKey = "mf_border";
+static const char * const borderKey = "wwb_border";
 
 @interface winBuddy : NSObject
 - (void)_updateMenubarState;
@@ -29,9 +29,9 @@ static const char * const borderKey = "mf_border";
 @end
 
 @interface NSWindow (wb_window)
-- (void)mf_setupBorder;
-- (void)mf_initBorder;
-- (void)mf_updateBorder;
+- (void)wwb_setupBorder;
+- (void)wwb_initBorder;
+- (void)wwb_updateBorder;
 @end
 
 winBuddy    *plugin;
@@ -40,8 +40,7 @@ static void *isActive = &isActive;
 
 @implementation winBuddy
 
-+ (winBuddy*) sharedInstance
-{
++ (winBuddy*) sharedInstance {
     static winBuddy* plugin = nil;
     
     if (plugin == nil)
@@ -50,15 +49,12 @@ static void *isActive = &isActive;
     return plugin;
 }
 
-+ (void)load
-{
++ (void)load {
     plugin = [winBuddy sharedInstance];
     NSUInteger osx_ver = [[NSProcessInfo processInfo] operatingSystemVersion].minorVersion;
     
-    if (osx_ver >= 9)
-    {
-        if (![APP_BLACKLIST containsObject:[[NSBundle mainBundle] bundleIdentifier]])
-        {
+    if (osx_ver >= 9) {
+        if (![APP_BLACKLIST containsObject:[[NSBundle mainBundle] bundleIdentifier]]) {
             NSLog(@"Loading winBuddy...");
             
             [Defaults registerDefaults:@{ PrefKey(@"HideMenubar"): @NO }];
@@ -78,14 +74,10 @@ static void *isActive = &isActive;
                                                        object:nil];
             
             NSLog(@"%@ loaded into %@ on macOS 10.%ld", [self class], [[NSBundle mainBundle] bundleIdentifier], (long)osx_ver);
-        }
-        else
-        {
+        } else {
             NSLog(@"winBuddy is blocked in this application because of issues");
         }
-    }
-    else
-    {
+    } else {
         NSLog(@"winBuddy is blocked in this application because of your version of macOS is too old");
     }
 }
@@ -96,14 +88,12 @@ static void *isActive = &isActive;
 
 - (void)winBuddy_initialize:(NSWindow*)theWindow {
 //    NSLog(@"wb_ %@", [theWindow className]);
-    if (![CLS_BLACKLIST containsObject:[theWindow className]])
-    {
-        if (![objc_getAssociatedObject(theWindow, isActive) boolValue])
-        {
+    if (![CLS_BLACKLIST containsObject:[theWindow className]]) {
+        if (![objc_getAssociatedObject(theWindow, isActive) boolValue]) {
             if (ReadPref(@"HideShadow") != nil)
                 theWindow.hasShadow = ![ReadPref(@"HideShadow") boolValue];
             [plugin _updateMenubarState];
-            [theWindow mf_setupBorder];
+            [theWindow wwb_setupBorder];
             objc_setAssociatedObject(theWindow, isActive, [NSNumber numberWithBool:true], OBJC_ASSOCIATION_RETAIN);
         }
     }
@@ -123,7 +113,7 @@ static void *isActive = &isActive;
 
 - (void)_updateBorderState {
     for(NSWindow *window in [NSApp windows])
-        [window mf_updateBorder];
+        [window wwb_updateBorder];
 }
 
 
@@ -171,21 +161,23 @@ static void *isActive = &isActive;
 
 @implementation NSWindow (wb_window)
 
-- (void)mf_setupBorder {
-    [NotificationCenter addObserver:self selector:@selector(mf_updateBorder)
+- (void)wwb_setupBorder {
+    [NotificationCenter addObserver:self selector:@selector(wwb_updateBorder)
                                name:NSWindowDidResizeNotification
                              object:self];
-    [NotificationCenter addObserver:self selector:@selector(mf_updateBorder)
+    [NotificationCenter addObserver:self selector:@selector(wwb_updateBorder)
                                name:NSWindowDidEndSheetNotification
                              object:self];
     
     // Wait till we're onscreen to add borders
-    [NotificationCenter addObserver:self selector:@selector(mf_initBorder)
+    [NotificationCenter addObserver:self selector:@selector(wwb_initBorder)
                                name:NSWindowDidUpdateNotification
                              object:self];
+    
+    [NotificationCenter addObserver:self selector:@selector(wwb_fscreen:) name:NSWindowDidEnterFullScreenNotification object:nil];
 }
 
-- (void)mf_initBorder {
+- (void)wwb_initBorder {
     [NotificationCenter removeObserver:self
                                   name:NSWindowDidUpdateNotification
                                 object:self];
@@ -195,6 +187,8 @@ static void *isActive = &isActive;
                                                   styleMask:NSBorderlessWindowMask
                                                     backing:NSBackingStoreBuffered
                                                       defer:NO];
+    
+//    NSLog(@"winbuddy %@", self.className);
     
     NSRect bounds  = { NSZeroPoint, self.frame.size };
     NSBox *border  = [[NSBox alloc] initWithFrame:bounds];
@@ -215,21 +209,21 @@ static void *isActive = &isActive;
     
     objc_setAssociatedObject(self, borderKey, child, OBJC_ASSOCIATION_RETAIN);
     
-    [NotificationCenter addObserver:self selector:@selector(mf_releaseChild)
+    [NotificationCenter addObserver:self selector:@selector(wwb_releaseChild)
                                name:NSWindowWillCloseNotification
                              object:self];
     
-    [NotificationCenter addObserver:self selector:@selector(mf_updateBorder)
+    [NotificationCenter addObserver:self selector:@selector(wwb_updateBorder)
                                name:NSWindowDidBecomeKeyNotification
                              object:self];
-    [NotificationCenter addObserver:self selector:@selector(mf_updateBorder)
+    [NotificationCenter addObserver:self selector:@selector(wwb_updateBorder)
                                name:NSWindowDidResignKeyNotification
                              object:self];
     
-    [self mf_updateBorder];
+    [self wwb_updateBorder];
 }
 
-- (void)mf_releaseChild {
+- (void)wwb_releaseChild {
     [NotificationCenter removeObserver:self
                                   name:NSWindowWillCloseNotification
                                 object:self];
@@ -246,7 +240,7 @@ static void *isActive = &isActive;
                                   name:NSWindowDidResignKeyNotification
                                 object:self];
 
-    [NotificationCenter addObserver:self selector:@selector(mf_setupBorder)
+    [NotificationCenter addObserver:self selector:@selector(wwb_setupBorder)
                                name:NSWindowDidBecomeKeyNotification
                              object:self];
     
@@ -254,12 +248,17 @@ static void *isActive = &isActive;
     [borderWin close];
 }
 
-- (void)mf_updateBorder {
+- (void)wwb_fscreen:(NSNotification *)note {
+    NSWindow *borderWin = objc_getAssociatedObject(self, borderKey);
+    [borderWin.contentView setBorderColor:[NSColor clearColor]];
+}
+
+- (void)wwb_updateBorder {
     NSWindow *borderWin = objc_getAssociatedObject(self, borderKey);
     [borderWin.contentView setBorderColor:self.isKeyWindow ? [NSColor redColor] : [NSColor blackColor]];
     [borderWin setFrame:self.frame display:YES];
     if (![ReadPref(@"ShowBorder") boolValue])
-            [borderWin.contentView setBorderColor:[NSColor clearColor]];
+        [borderWin.contentView setBorderColor:[NSColor clearColor]];
 }
 
 @end
