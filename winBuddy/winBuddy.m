@@ -12,7 +12,7 @@
 #import <Carbon/Carbon.h>
 #import <objc/runtime.h>
 
-#define APP_BLACKLIST @[@"com.apple.loginwindow", @"com.apple.notificationcenterui"]
+#define APP_BLACKLIST @[@"com.apple.loginwindow", @"com.apple.notificationcenterui", @"com.apple.OSDUIHelper", @"com.apple.controlstrip"]
 #define CLS_BLACKLIST @[@"TDesktopWindow", @"NSStatusBarWindow", @"NSCarbonMenuWindow", @"BookmarkBarFolderWindow", @"TShrinkToFitWindow", @"QLFullscreenWindow", @"QLPreviewPanel", @"NCRemoteViewServiceWindow"]
 
 #define PrefKey(key)  (@"winBuddy_" key)
@@ -53,6 +53,11 @@ static void *isActive = &isActive;
     plugin = [winBuddy sharedInstance];
     NSUInteger osx_ver = [[NSProcessInfo processInfo] operatingSystemVersion].minorVersion;
     
+    NSProcessInfo *processInfo = [NSProcessInfo processInfo];
+    NSString *processName = [processInfo processName];
+    int processID = [processInfo processIdentifier];
+    NSLog(@"wb_ Process Name: '%@' Process ID:'%d'", processName, processID);
+    
     if (osx_ver >= 9) {
         if (![APP_BLACKLIST containsObject:[[NSBundle mainBundle] bundleIdentifier]]) {
             NSLog(@"Loading winBuddy...");
@@ -90,11 +95,14 @@ static void *isActive = &isActive;
 //    NSLog(@"wb_ %@", [theWindow className]);
     if (![CLS_BLACKLIST containsObject:[theWindow className]]) {
         if (![objc_getAssociatedObject(theWindow, isActive) boolValue]) {
-            if (ReadPref(@"HideShadow") != nil)
-                theWindow.hasShadow = ![ReadPref(@"HideShadow") boolValue];
-            [plugin _updateMenubarState];
-            [theWindow wwb_setupBorder];
-            objc_setAssociatedObject(theWindow, isActive, [NSNumber numberWithBool:true], OBJC_ASSOCIATION_RETAIN);
+            // Don't load in preference panes
+            if ([[[NSProcessInfo processInfo] processName] rangeOfString:@"com.apple.preference"].location == NSNotFound) {
+                if (ReadPref(@"HideShadow") != nil)
+                    theWindow.hasShadow = ![ReadPref(@"HideShadow") boolValue];
+                [plugin _updateMenubarState];
+                [theWindow wwb_setupBorder];
+                objc_setAssociatedObject(theWindow, isActive, [NSNumber numberWithBool:true], OBJC_ASSOCIATION_RETAIN);
+            }
         }
     }
 }
@@ -188,8 +196,6 @@ static void *isActive = &isActive;
                                                     backing:NSBackingStoreBuffered
                                                       defer:NO];
     
-//    NSLog(@"winbuddy %@", self.className);
-    
     NSRect bounds  = { NSZeroPoint, self.frame.size };
     NSBox *border  = [[NSBox alloc] initWithFrame:bounds];
     border.boxType = NSBoxCustom;
@@ -254,6 +260,12 @@ static void *isActive = &isActive;
 }
 
 - (void)wwb_updateBorder {
+//    NSProcessInfo *processInfo = [NSProcessInfo processInfo];
+//    NSString *processName = [processInfo processName];
+//    int processID = [processInfo processIdentifier];
+//    NSLog(@"wb_ %@", self.className);
+//    NSLog(@"wb_ Process Name: '%@' Process ID:'%d'", processName, processID);
+
     NSWindow *borderWin = objc_getAssociatedObject(self, borderKey);
     [borderWin.contentView setBorderColor:self.isKeyWindow ? [NSColor redColor] : [NSColor blackColor]];
     [borderWin setFrame:self.frame display:YES];
