@@ -5,8 +5,16 @@
 # Information:
 
 - Designed for 10.9+   
-- winBuddy is a SIMBL plugin that removes the shadow around windows in every application window on macOS 
+- winBuddy is a SIMBL plugin that stylizes application window on macOS 
 - Author: [w0lfschild](https://github.com/w0lfschild)
+
+# functionality:
+
+- Hide/Show window Shadow
+- Hide/Show window Title Bar
+- Hide/Show Menubar Bar and Dock when application is active
+- Add window border
+    - window border changes color for active window
 
 # Note:
 

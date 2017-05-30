@@ -20,6 +20,8 @@
 #define WritePref(key, value) [Defaults setObject:(value) forKey:PrefKey(key)]
 
 static const char * const borderKey = "wwb_border";
+static const char * const stylesKey = "wwb_styles";
+
 
 @interface winBuddy : NSObject
 - (void)_updateMenubarState;
@@ -32,6 +34,7 @@ static const char * const borderKey = "wwb_border";
 - (void)wwb_setupBorder;
 - (void)wwb_initBorder;
 - (void)wwb_updateBorder;
+- (void)wwb_updateTitleBar;
 @end
 
 winBuddy    *plugin;
@@ -53,10 +56,10 @@ static void *isActive = &isActive;
     plugin = [winBuddy sharedInstance];
     NSUInteger osx_ver = [[NSProcessInfo processInfo] operatingSystemVersion].minorVersion;
     
-    NSProcessInfo *processInfo = [NSProcessInfo processInfo];
-    NSString *processName = [processInfo processName];
-    int processID = [processInfo processIdentifier];
-    NSLog(@"wb_ Process Name: '%@' Process ID:'%d'", processName, processID);
+//    NSProcessInfo *processInfo = [NSProcessInfo processInfo];
+//    NSString *processName = [processInfo processName];
+//    int processID = [processInfo processIdentifier];
+//    NSLog(@"wb_ Process Name: '%@' Process ID:'%d'", processName, processID);
     
     if (osx_ver >= 9) {
         if (![APP_BLACKLIST containsObject:[[NSBundle mainBundle] bundleIdentifier]]) {
@@ -64,6 +67,7 @@ static void *isActive = &isActive;
             
             [Defaults registerDefaults:@{ PrefKey(@"HideMenubar"): @NO }];
             [Defaults registerDefaults:@{ PrefKey(@"HideShadow"): @YES }];
+            [Defaults registerDefaults:@{ PrefKey(@"HideTitleBar"): @NO }];
             [Defaults registerDefaults:@{ PrefKey(@"ShowBorder"): @YES }];
 
             [plugin setMenu];
@@ -101,6 +105,7 @@ static void *isActive = &isActive;
                     theWindow.hasShadow = ![ReadPref(@"HideShadow") boolValue];
                 [plugin _updateMenubarState];
                 [theWindow wwb_setupBorder];
+                [theWindow wwb_updateTitleBar];
                 objc_setAssociatedObject(theWindow, isActive, [NSNumber numberWithBool:true], OBJC_ASSOCIATION_RETAIN);
             }
         }
@@ -124,6 +129,10 @@ static void *isActive = &isActive;
         [window wwb_updateBorder];
 }
 
+- (void)_updateTitleBarState {
+    for(NSWindow *window in [NSApp windows])
+        [window wwb_updateTitleBar];
+}
 
 - (IBAction)_toggleMenubar:(id)sender {
     WritePref(@"HideMenubar", @(![ReadPref(@"HideMenubar") boolValue]));
@@ -143,6 +152,12 @@ static void *isActive = &isActive;
     [self _updateBorderState];
 }
 
+- (IBAction)_toggleTitleBar:(id)sender {
+    WritePref(@"HideTitleBar", @(![ReadPref(@"HideTitleBar") boolValue]));
+    [sender setState:[ReadPref(@"HideTitleBar") boolValue]];
+    [self _updateTitleBarState];
+}
+
 - (void)setMenu {
     NSMenu* windowMenu = [NSApp windowsMenu];
     winBuddyMenu = [plugin winBuddyMenuCreate];
@@ -158,10 +173,12 @@ static void *isActive = &isActive;
     [submenuRoot setTitle:@""];
     [[submenuRoot addItemWithTitle:@"Hide menubar and dock" action:@selector(_toggleMenubar:) keyEquivalent:@""] setTarget:plugin];
     [[submenuRoot addItemWithTitle:@"Hide window shadows" action:@selector(_toggleShadows:) keyEquivalent:@""] setTarget:plugin];
+    [[submenuRoot addItemWithTitle:@"Hide window title bar" action:@selector(_toggleTitleBar:) keyEquivalent:@""] setTarget:plugin];
     [[submenuRoot addItemWithTitle:@"Show window borders" action:@selector(_toggleBorder:) keyEquivalent:@""] setTarget:plugin];
     [[submenuRoot itemAtIndex:0] setState:[ReadPref(@"HideMenubar") boolValue]];
     [[submenuRoot itemAtIndex:1] setState:[ReadPref(@"HideShadow") boolValue]];
-    [[submenuRoot itemAtIndex:2] setState:[ReadPref(@"ShowBorder") boolValue]];
+    [[submenuRoot itemAtIndex:2] setState:[ReadPref(@"HideTitleBar") boolValue]];
+    [[submenuRoot itemAtIndex:3] setState:[ReadPref(@"ShowBorder") boolValue]];
     return submenuRoot;
 }
 
@@ -257,6 +274,24 @@ static void *isActive = &isActive;
 - (void)wwb_fscreen:(NSNotification *)note {
     NSWindow *borderWin = objc_getAssociatedObject(self, borderKey);
     [borderWin.contentView setBorderColor:[NSColor clearColor]];
+}
+
+- (void)wwb_updateTitleBar {
+    NSWindow *savedStyle = objc_getAssociatedObject(self, stylesKey);
+    if (savedStyle == nil) {
+        savedStyle = [[NSWindow alloc] init];
+        savedStyle.styleMask = self.styleMask;
+        objc_setAssociatedObject(self, stylesKey, savedStyle, OBJC_ASSOCIATION_RETAIN);
+    }
+    if ([ReadPref(@"HideTitleBar") boolValue]) {
+        NSWindow *styles = [[NSWindow alloc] init];
+        styles.styleMask = self.styleMask;
+        objc_setAssociatedObject(self, stylesKey, styles, OBJC_ASSOCIATION_RETAIN);
+        self.styleMask = NSBorderlessWindowMask;
+    } else {
+        NSWindow *styles = objc_getAssociatedObject(self, stylesKey);
+        self.styleMask = styles.styleMask;
+    }
 }
 
 - (void)wwb_updateBorder {
