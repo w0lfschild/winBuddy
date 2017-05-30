@@ -284,13 +284,21 @@ static void *isActive = &isActive;
         objc_setAssociatedObject(self, stylesKey, savedStyle, OBJC_ASSOCIATION_RETAIN);
     }
     if ([ReadPref(@"HideTitleBar") boolValue]) {
-        NSWindow *styles = [[NSWindow alloc] init];
-        styles.styleMask = self.styleMask;
-        objc_setAssociatedObject(self, stylesKey, styles, OBJC_ASSOCIATION_RETAIN);
-        self.styleMask = NSBorderlessWindowMask;
+        if (self.toolbar != nil) {
+            self.titleVisibility = true;
+        } else {
+            NSWindow *styles = [[NSWindow alloc] init];
+            styles.styleMask = self.styleMask;
+            objc_setAssociatedObject(self, stylesKey, styles, OBJC_ASSOCIATION_RETAIN);
+            self.styleMask = NSBorderlessWindowMask;
+        }
     } else {
-        NSWindow *styles = objc_getAssociatedObject(self, stylesKey);
-        self.styleMask = styles.styleMask;
+        if (self.toolbar != nil) {
+            self.titleVisibility = false;
+        } else {
+            NSWindow *styles = objc_getAssociatedObject(self, stylesKey);
+            self.styleMask = styles.styleMask;
+        }
     }
 }
 
