@@ -35,6 +35,7 @@ static const char * const stylesKey = "wwb_styles";
 - (void)wwb_initBorder;
 - (void)wwb_updateBorder;
 - (void)wwb_updateTitleBar;
+- (void)wwb_updateToolBar;
 @end
 
 winBuddy    *plugin;
@@ -105,6 +106,7 @@ static void *isActive = &isActive;
                     theWindow.hasShadow = ![ReadPref(@"HideShadow") boolValue];
                 [plugin _updateMenubarState];
                 [theWindow wwb_setupBorder];
+                [theWindow wwb_updateToolBar];
                 [theWindow wwb_updateTitleBar];
                 objc_setAssociatedObject(theWindow, isActive, [NSNumber numberWithBool:true], OBJC_ASSOCIATION_RETAIN);
             }
@@ -134,6 +136,11 @@ static void *isActive = &isActive;
         [window wwb_updateTitleBar];
 }
 
+- (void)_updateToolBarState {
+    for(NSWindow *window in [NSApp windows])
+        [window wwb_updateToolBar];
+}
+
 - (IBAction)_toggleMenubar:(id)sender {
     WritePref(@"HideMenubar", @(![ReadPref(@"HideMenubar") boolValue]));
     [sender setState:[ReadPref(@"HideMenubar") boolValue]];
@@ -158,6 +165,12 @@ static void *isActive = &isActive;
     [self _updateTitleBarState];
 }
 
+- (IBAction)_toggleToolBar:(id)sender {
+    WritePref(@"HideToolBar", @(![ReadPref(@"HideToolBar") boolValue]));
+    [sender setState:[ReadPref(@"HideToolBar") boolValue]];
+    [self _updateToolBarState];
+}
+
 - (void)setMenu {
     NSMenu* windowMenu = [NSApp windowsMenu];
     winBuddyMenu = [plugin winBuddyMenuCreate];
@@ -174,11 +187,13 @@ static void *isActive = &isActive;
     [[submenuRoot addItemWithTitle:@"Hide menubar and dock" action:@selector(_toggleMenubar:) keyEquivalent:@""] setTarget:plugin];
     [[submenuRoot addItemWithTitle:@"Hide window shadows" action:@selector(_toggleShadows:) keyEquivalent:@""] setTarget:plugin];
     [[submenuRoot addItemWithTitle:@"Hide window title bar" action:@selector(_toggleTitleBar:) keyEquivalent:@""] setTarget:plugin];
+    [[submenuRoot addItemWithTitle:@"Hide window tool bar" action:@selector(_toggleToolBar:) keyEquivalent:@""] setTarget:plugin];
     [[submenuRoot addItemWithTitle:@"Show window borders" action:@selector(_toggleBorder:) keyEquivalent:@""] setTarget:plugin];
     [[submenuRoot itemAtIndex:0] setState:[ReadPref(@"HideMenubar") boolValue]];
     [[submenuRoot itemAtIndex:1] setState:[ReadPref(@"HideShadow") boolValue]];
     [[submenuRoot itemAtIndex:2] setState:[ReadPref(@"HideTitleBar") boolValue]];
-    [[submenuRoot itemAtIndex:3] setState:[ReadPref(@"ShowBorder") boolValue]];
+    [[submenuRoot itemAtIndex:3] setState:[ReadPref(@"HideToolBar") boolValue]];
+    [[submenuRoot itemAtIndex:4] setState:[ReadPref(@"ShowBorder") boolValue]];
     return submenuRoot;
 }
 
@@ -276,28 +291,57 @@ static void *isActive = &isActive;
     [borderWin.contentView setBorderColor:[NSColor clearColor]];
 }
 
+- (void)wwb_updateToolBar {
+    if (self.toolbar != nil) {
+        if ([ReadPref(@"HideToolBar") boolValue]) {
+            [self.toolbar setVisible:false];
+        } else {
+            [self.toolbar setVisible:true];
+        }
+    }
+}
+
 - (void)wwb_updateTitleBar {
     NSWindow *savedStyle = objc_getAssociatedObject(self, stylesKey);
     if (savedStyle == nil) {
         savedStyle = [[NSWindow alloc] init];
         savedStyle.styleMask = self.styleMask;
+        [savedStyle setIsZoomed:true];
+        [savedStyle.toolbar setVisible:self.toolbar.isVisible];
         objc_setAssociatedObject(self, stylesKey, savedStyle, OBJC_ASSOCIATION_RETAIN);
+    } else {
+        [savedStyle setIsZoomed:false];
     }
     if ([ReadPref(@"HideTitleBar") boolValue]) {
-        if (self.toolbar != nil) {
-            self.titleVisibility = true;
-        } else {
-            NSWindow *styles = [[NSWindow alloc] init];
-            styles.styleMask = self.styleMask;
-            objc_setAssociatedObject(self, stylesKey, styles, OBJC_ASSOCIATION_RETAIN);
-            self.styleMask = NSBorderlessWindowMask;
-        }
+        self.titlebarAppearsTransparent = true;
+        self.titleVisibility = true;
+        NSWindow *styles = [[NSWindow alloc] init];
+        styles.styleMask = self.styleMask;
+        objc_setAssociatedObject(self, stylesKey, styles, OBJC_ASSOCIATION_RETAIN);
+        NSView *titleView = [[NSView alloc] init];
+        NSView *border = [self performSelector:@selector(_borderView)];
+        for (NSView *v in [border subviews])
+            if ([[v className] isEqualToString:@"NSTitlebarContainerView"])
+                titleView = [[v subviews] firstObject];
+        [titleView setHidden:true];
+        CGRect newFrame = self.contentView.frame;
+        newFrame.size.height += titleView.frame.size.height;
+        [self.contentView setFrame:newFrame];
     } else {
-        if (self.toolbar != nil) {
-            self.titleVisibility = false;
-        } else {
-            NSWindow *styles = objc_getAssociatedObject(self, stylesKey);
-            self.styleMask = styles.styleMask;
+        self.titlebarAppearsTransparent = false;
+        self.titleVisibility = false;
+        NSWindow *styles = objc_getAssociatedObject(self, stylesKey);
+        self.styleMask = styles.styleMask;
+        NSView *titleView = [[NSView alloc] init];
+        NSView *border = [self performSelector:@selector(_borderView)];
+        for (NSView *v in [border subviews])
+            if ([[v className] isEqualToString:@"NSTitlebarContainerView"])
+                titleView = [[v subviews] firstObject];
+        [titleView setHidden:false];
+        CGRect newFrame = self.contentView.frame;
+        if (!savedStyle.isZoomed) {
+            newFrame.size.height -= titleView.frame.size.height;
+            [self.contentView setFrame:newFrame];
         }
     }
 }
