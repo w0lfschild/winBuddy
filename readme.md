@@ -5,7 +5,7 @@
 # Information:
 
 - Designed for 10.9+   
-- winBuddy is a SIMBL plugin that stylizes application window on macOS 
+- winBuddy is a MacForge plugin that stylizes application window on MacOS 
 - Author: [w0lfschild](https://github.com/w0lfschild)
 
 # functionality:
@@ -24,11 +24,8 @@
 
 # Installation:
 
-1. Download [mySIMBL](https://github.com/w0lfschild/app_updates/raw/master/mySIMBL/mySIMBL_master.zip)
-2. Download [winBuddy](https://github.com/w0lfschild/winBuddy/raw/master/build/winBuddy.bundle.zip)
-3. Unzip downloads
-4. Open `winBuddy.bundle` with `mySIMBL.app`
-5. Restart any application to have winBuddy plugin loaded
+1. Download and open [MacForge](https://github.com/w0lfschild/app_updates/raw/master/MacForge/MacForge.zip)
+2. Install [winBuddy](https://www.macenhance.com/mflink?macforge://github.com/w0lfschild/myRepo/raw/master/mytweaks/org.w0lf.winBuddy)
 
 ### License:
 Pretty much the BSD license, just don't repackage it and call it your own please!    
