@@ -20,7 +20,7 @@
 
 - Some applications may look odd
 - Some applications are blacklisted by default including Notification Center and LoginWindow
-- winBuddy functionality is controlled form the window menu in individual applications
+- winBuddy functionality is controlled from the window menu in individual applications
 
 # Installation:
 
